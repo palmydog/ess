@@ -1,0 +1,9 @@
+#ignore .settings folder
+.settings/
+
+#ignore bin folder
+bin/
+
+#ignore other project related files
+.classpath
+.project
