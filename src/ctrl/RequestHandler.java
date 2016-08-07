@@ -11,13 +11,12 @@ import mdl.*;
  *
  */
 public class RequestHandler {
-	//private List<List<Request>> requestQueue;
+	//elenum -> requeue
 	private HashMap<Integer, RequestQueue> requestMap;
-	private HashMap<Integer, ElevatorState> elestate;
 	
-	public RequestHandler(HashMap<Integer, RequestQueue> requestMap, HashMap<Integer, ElevatorState> elestate){
+	public RequestHandler(HashMap<Integer, RequestQueue> requestMap){
 		this.requestMap = requestMap;
-		this.elestate = elestate;
+		//this.elestate = elestate;
 	}
 
 	public int addRequest(Request request){
@@ -46,7 +45,7 @@ public class RequestHandler {
 		//insert request will get the exact elevator to response.
 		int eleNo = request.elevatorNumber;
 		RequestQueue req = requestMap.get((Integer)eleNo);
-		List<Request> reqq;
+		HashMap<Integer,HashMap<Integer,Request>> reqq;
 		if(request.direction == State.DIRECTIONDOWN){
 			reqq = req.requestDownQ;
 		}
@@ -56,31 +55,25 @@ public class RequestHandler {
 		else{
 			return;//Exception Happened.
 		}
-		//Insert the request inside.
-		for(int i = 0; i <= reqq.size() ; i ++){
-			//Already approaches the end of the queue, add the request directly.
-			if(i == reqq.size()){
-				reqq.add(request);
+		//Totally new request, add it.
+		if(!reqq.containsKey(request.floorOfDestination)){
+			HashMap<Integer,Request> typeq = new HashMap<Integer,Request>();
+			typeq.put(request.requestType, request);
+			reqq.put(request.floorOfDestination, typeq);
+			return;
+		}
+		else{
+			HashMap<Integer,Request> typeq = reqq.get(request.floorOfDestination);
+			if(!typeq.containsKey(request.requestType)){
+				typeq.put(request.requestType, request);
 				return;
 			}
-			//Compare the destination
-			if(request.floorOfDestination > reqq.get(i).floorOfDestination){
-				continue;
-			}
-			else if(request.floorOfDestination == reqq.get(i).floorOfDestination){
-				//Exactly the same request, ignore this request.
-				if(request.requestType == reqq.get(i).requestType){
-					return;
-				}
-				else{
-					continue;
-				}
-			}
 			else{
-				reqq.add(i, request);
 				return;
 			}
 		}
+		//Insert the request inside.
+		
 	}
 	
 }
